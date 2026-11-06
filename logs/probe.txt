@@ -1,0 +1,6 @@
+home 200 534122
+catalog 200 599687
+search 200 483695
+product 200 550511
+sitemap 200 10403
+robots 200 178
