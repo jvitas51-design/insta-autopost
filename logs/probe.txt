@@ -1,1 +1,0 @@
-CompletedProcess(args=['python3', 'app/catalog.py', 'logs/probe'], returncode=0, stdout='catalog 939 sets 40\n', stderr='')

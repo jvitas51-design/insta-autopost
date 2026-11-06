@@ -1,0 +1,31 @@
+name: Предпросмотр сетки
+on:
+  workflow_dispatch:
+    inputs:
+      rows:
+        description: 'Сколько постингов вперёд показать'
+        default: '5'
+  push:
+    paths: ['app/**', 'library/**', 'config.json', '.github/workflows/preview.yml']
+permissions:
+  contents: write
+concurrency: preview
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
+      - run: pip install -q -r requirements.txt
+      - run: python app/main.py preview ${{ github.event.inputs.rows || '5' }} 2>&1 | tee logs/preview.txt; exit ${PIPESTATUS[0]}
+        shell: bash
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN_AUTOPOSTING }}
+      - if: always()
+        run: |
+          git config user.name autopost-bot; git config user.email autopost-bot@users.noreply.github.com
+          git pull -q --rebase || true
+          git add -A preview logs cache && git commit -qm "preview" && git push -q || true

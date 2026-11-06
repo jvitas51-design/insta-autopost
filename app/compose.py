@@ -76,3 +76,17 @@ def render_template(tpl_img, slots, arts):
             keep=poly_mask(orig.size,slot[2]) if len(slot)>2 else None
             paste_rect(base,a,box,keep)
     return base
+
+def refine_rect(img, box, search=30):
+    g=np.asarray(img.convert('L')).astype(float)
+    gx=np.abs(nd.sobel(g,1)); gy=np.abs(nd.sobel(g,0))
+    x0,y0,x1,y1=[int(v) for v in box]
+    def best_v(xc,ya,yb):
+        xs=range(max(1,xc-search),min(g.shape[1]-1,xc+search)); return max(xs,key=lambda x: gx[ya:yb,x].mean())
+    def best_h(yc,xa,xb):
+        ys=range(max(1,yc-search),min(g.shape[0]-1,yc+search)); return max(ys,key=lambda y: gy[y,xa:xb].mean())
+    for _ in range(2):
+        my=(y1-y0)//6; mx=(x1-x0)//6
+        x0=best_v(x0,y0+my,y1-my); x1=best_v(x1,y0+my,y1-my)
+        y0=best_h(y0,x0+mx,x1-mx); y1=best_h(y1,x0+mx,x1-mx)
+    return (x0,y0,x1,y1)
