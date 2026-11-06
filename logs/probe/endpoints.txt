@@ -1,0 +1,10 @@
+/api/server/content/categories-tree
+/api/server/content/product-sizes
+/api/server/products/
+/api/server/products/saved
+/api/server/products/saved/
+/api/server/testimonials/product/
+/catalog
+/catalog/
+/kits
+/product/
