@@ -1,26 +1,28 @@
-"""Загрузка каталога с сайта artbynumbers.com.ua (публичные данные)."""
-import urllib.request, re, json, time
-API='https://api.artbynumbers.com.ua/api/server'
+"""Каталог сайта artbynumbers.com.ua через его публичный API."""
+import urllib.request, urllib.parse, json, time
+API='https://api.artbynumbers.com.ua/api/server/products'
 H={'User-Agent':'Mozilla/5.0 (compatible; autopost-bot)','Accept':'application/json'}
-def _get(u, raw=False):
+def _get(params):
+    u=API+'?'+urllib.parse.urlencode(params)
     for i in range(3):
         try:
-            with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=40) as r:
-                b=r.read(); return b if raw else json.loads(b)
-        except Exception as e:
+            with urllib.request.urlopen(urllib.request.Request(u,headers=H),timeout=60) as r:
+                return int(r.headers.get('x-total') or 0), json.loads(r.read())
+        except Exception:
             if i==2: raise
-            time.sleep(2)
-def product_ids():
-    sm=_get('https://artbynumbers.com.ua/sitemap.xml',raw=True).decode()
-    return re.findall(r'/product/([0-9a-f\-]{36})',sm)
-def fetch_all():
-    out=[]
-    for pid in product_ids():
-        try: out.append(_get(f'{API}/products/{pid}'))
-        except Exception as e: print('skip',pid,e)
+            time.sleep(3)
+def fetch(category=None, limit=100):
+    out=[]; page=1
+    while True:
+        p={'page':page,'limit':limit}
+        if category: p['category']=category
+        total,items=_get(p); out+=items
+        if not items or len(out)>=total: break
+        page+=1
     return out
 if __name__=='__main__':
-    import sys
-    data=fetch_all()
-    json.dump(data,open(sys.argv[1] if len(sys.argv)>1 else 'catalog.json','w'),ensure_ascii=False)
-    print('products',len(data))
+    import sys, os
+    d=sys.argv[1] if len(sys.argv)>1 else 'data'; os.makedirs(d,exist_ok=True)
+    allp=fetch(); json.dump(allp,open(f'{d}/catalog.json','w'),ensure_ascii=False)
+    sets=fetch('nabory-kartyn'); json.dump(sets,open(f'{d}/sets.json','w'),ensure_ascii=False)
+    print('catalog',len(allp),'sets',len(sets))
