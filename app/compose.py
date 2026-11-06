@@ -63,7 +63,7 @@ def sheet_mask(img, box):
     M=np.zeros(a.shape[:2],bool); M[y0:y1,x0:x1]=keep; return M
 
 def poly_mask(size, poly, grow=1):
-    m=Image.new('L',size,0); ImageDraw.Draw(m).polygon(poly,fill=255)
+    m=Image.new('L',size,0); ImageDraw.Draw(m).polygon([tuple(p) for p in poly],fill=255)
     m=m.filter(ImageFilter.MaxFilter(grow*2+1))
     return np.asarray(m)>0
 
