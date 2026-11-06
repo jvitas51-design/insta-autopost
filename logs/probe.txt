@@ -1,1 +1,5 @@
-endpoints 10
+https://api.artbynumbers.com.ua/api/server/products 200 87361
+https://api.artbynumbers.com.ua/api/server/products/?page=1&limit=5 500 52
+https://artbynumbers.com.ua/api/server/products/?page=1&limit=5 404 209884
+https://artbynumbers.com.ua/kits 404 208700
+https://api.artbynumbers.com.ua/api/server/content/categories-tree 200 16431
