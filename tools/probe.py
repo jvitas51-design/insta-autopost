@@ -8,9 +8,12 @@ def get(u):
     except Exception as e: return 'ERR',str(e).encode()
 html=open('logs/probe/product.html',encoding='utf-8').read()
 js=sorted(set(re.findall(r'/_nuxt/[a-z0-9.]+\.js',html)))
-eps=set()
+out=[]
 for p in js:
     st,b=get('https://artbynumbers.com.ua'+p); t=b.decode('utf-8','ignore')
-    for m in re.findall(r'["\x60]((?:/api)?/(?:v\d/)?[a-zA-Z\-_/]*(?:product|categor|kit|catalog|set|search)[a-zA-Z\-_/${}.]*)["\x60]',t): eps.add(m)
-open('logs/probe/endpoints.txt','w').write('\n'.join(sorted(eps)))
-print('endpoints',len(eps))
+    for m in re.finditer(r'api/server/products|kits',t):
+        out.append(p+' :: '+t[max(0,m.start()-300):m.start()+300])
+open('logs/probe/ctx.txt','w').write('\n\n'.join(out[:40]))
+for u in ['https://api.artbynumbers.com.ua/api/server/products','https://api.artbynumbers.com.ua/api/server/products/?page=1&limit=5',
+          'https://artbynumbers.com.ua/api/server/products/?page=1&limit=5','https://artbynumbers.com.ua/kits','https://api.artbynumbers.com.ua/api/server/content/categories-tree']:
+    st,b=get(u); print(u,st,len(b)); open('logs/probe/'+re.sub(r'\W+','_',u)[-60:]+'.txt','wb').write(b[:300000])
