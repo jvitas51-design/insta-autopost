@@ -1,1 +1,6 @@
-НЕТ ТОКЕНА: секрет IG_TOKEN пустой или не найден
+Пользователь токена: {'id': '122106538251532974', 'name': 'Autopost'}
+Права токена: ['pages_show_list', 'business_management', 'instagram_basic', 'instagram_content_publish', 'pages_read_engagement', 'public_profile']
+Истекает: 0 (0 = никогда)
+Страницы: {"data": [{"name": "Art by numbers", "instagram_business_account": {"id": "17841424966512586", "username": "art_bynumbers_ua"}, "id": "106272191025324"}], "paging": {"cursors": {"before": "QVFIVDNVNWVrRzZAiWEtFUGg3MzRZAX2RiYmVkMk9VcVBZAOV9wV2JmM1EtNUpTdjRHZA2wzTVFiX1BBSVNkVUF1TDEwbnBRR01Qc1pPTkpmVFRjeTJVSWFNaTJ3", "after": "QVFIVDNVNWVrRzZAiWEtFUGg3MzRZAX2RiYmVkMk9VcVBZAOV9wV2JmM1EtNUpTdjRHZA2wzTVFiX1BBSVNkVUF1TDEwbnBRR01Qc1pPTkpmVFRjeTJVSWFNaTJ3"}}}
+Instagram: art_bynumbers_ua ID 17841424966512586 лимит публикаций: {'data': [{'quota_usage': 0, 'config': {'quota_total': 100, 'quota_duration': 86400}}]}
+ТОКЕН РАБОТАЕТ
