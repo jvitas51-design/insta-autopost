@@ -1,0 +1,13 @@
+name: Проверка токена
+on:
+  workflow_dispatch:
+  push:
+    paths: ['tools/check_token.py','.github/workflows/check-token.yml']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/check_token.py
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
