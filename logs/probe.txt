@@ -1,1 +1,11 @@
-found 19 chunks 59
+{} total 939 n 20 first ['ABN-1065P', 'ABN-1064P', 'ABN-1049P', 'ABN-1040P']
+{'page': 2} total 939 n 20 first ['ABN-045KP', 'ABN-044KP', 'ABN-042KP', 'ABN-041KP']
+{'category': 'kartyny-za-nomeramy/krugli-kartyny'} total 0 n 0 first []
+{'category': 'kartyny-za-nomeramy'} total 408 n 20 first ['ABN-1065P', 'ABN-1064P', 'ABN-1049P', 'ABN-1040P']
+{'category': 'nabory-kartyn'} total 40 n 20 first ['ABN021805', 'ABN021804', 'ABN021802', 'ABN030127']
+{'category': 'nabory-kartyn/kompozytsii-z-farbamy-metalik'} total 32 n 20 first ['ABN021805', 'ABN021804', 'ABN021802', 'ABN030127']
+{'category': 'kartyny-za-nomeramy', 'page': 5} total 408 n 20 first ['BS33346', 'BS51494', 'BS53222', 'RBS53988']
+{'category': 'kartyny-za-nomeramy', 'limit': 100} total 408 n 100 first ['ABN-1065P', 'ABN-1064P', 'ABN-1049P', 'ABN-1040P']
+{'category': 'kartyny-za-nomeramy', 'perPage': 100} ERR HTTP Error 400: Bad Request
+{'category': 'kartyny-za-nomeramy', 'pageSize': 100} ERR HTTP Error 400: Bad Request
+{'search': 'ABN-039K'} total 1 n 1 first ['ABN-039KP']
