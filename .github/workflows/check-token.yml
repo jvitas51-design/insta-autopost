@@ -13,7 +13,7 @@ jobs:
       - run: python3 tools/check_token.py 2>&1 | tee logs/check_token.txt; exit ${PIPESTATUS[0]}
         shell: bash
         env:
-          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN_AUTOPOSTING }}
       - if: always()
         run: |
           git config user.name "autopost-bot"; git config user.email "autopost-bot@users.noreply.github.com"
