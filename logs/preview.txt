@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/runner/work/insta-autopost/insta-autopost/app/main.py", line 180, in <module>
+    preview(int(sys.argv[2]) if len(sys.argv) > 2 else 5)
+  File "/home/runner/work/insta-autopost/insta-autopost/app/main.py", line 112, in preview
+    files = render(lib, p, P('preview', f'p{i+1}'), seed=len(sim))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/insta-autopost/insta-autopost/app/render.py", line 29, in render
+    out = render_template(img, slots, [lib.art(s) for s in pair])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/insta-autopost/insta-autopost/app/compose.py", line 76, in render_template
+    keep=poly_mask(orig.size,slot[2]) if len(slot)>2 else None
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/insta-autopost/insta-autopost/app/compose.py", line 66, in poly_mask
+    m=Image.new('L',size,0); ImageDraw.Draw(m).polygon(poly,fill=255)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/PIL/ImageDraw.py", line 362, in polygon
+    self.draw.draw_polygon(xy, fill_ink, 1)
+ValueError: incorrect coordinate type
