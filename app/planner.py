@@ -59,8 +59,10 @@ def plan(lib, history):
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     import zlib
     reel = max(reels, key=lambda s: (min(last_used(history, 'reel', s), 50), zlib.crc32(s.encode()) % 1000))
-    anchor = [F['reel:' + reel]]
-    # 2. фото со съёмки: другая картина, ближе по цвету
+    # цвет рилса и фото считаем по самой картине (ровная картинка с сайта), а не по кадру с фоном
+    col = lambda item, kind: F.get(sku_of(item)) or F[kind + ':' + item]
+    anchor = [col(reel, 'reel')]
+    # 2. фото со съёмки: другая картина, ближе всего по цвету к рилсу
     photos = [s for s in lib.photos if sku_of(s) != sku_of(reel) and s not in recent(history, 'photo')
               and sku_of(s) not in recent(history, 'photo_sku') and sku_of(s) not in seen]
     if not photos:
@@ -68,45 +70,51 @@ def plan(lib, history):
         warn.append('фото со съёмки мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     if not photos:
         raise RuntimeError('нет фото со съёмки')
-    photo = min(photos, key=lambda s: palette.group_distance(anchor, F['photo:' + s]) - 0.02 * min(last_used(history, 'photo', s), 20))
-    anchor.append(F['photo:' + photo])
+    photo = min(photos, key=lambda s: palette.group_distance(anchor, col(s, 'photo')) - 0.003 * min(last_used(history, 'photo', s), 20))
+    anchor.append(col(photo, 'photo'))
     busy = {sku_of(reel), sku_of(photo)}
     kinds = interior_kinds(lib)
-    # 3. «Новинки»: первый слайд — 1 картина в интерьере, который целиком виден в сетке
-    singles = {sh: [n for n in kinds.get((1, sh), []) if fits_grid(lib.templates['interiors'][n])] for sh in ('round', 'rect')}
-    prev_shape = pool.get(history[-1].get('news_first'), {}).get('shape') if history else None
-    first_c = [s for s, p in pool.items() if s not in busy and s not in seen and s not in recent(history, 'news_first') and singles[p['shape']]]
-    alt = [s for s in first_c if pool[s]['shape'] != prev_shape]
-    first_c = alt or first_c
-    first = min(first_c, key=lambda s: palette.group_distance(anchor, F[s]) - (0.15 if pool[s]['new'] else 0))
-    busy.add(first)
-    # 4. наборы для «Новинок»
-    sets = [st for st in lib.sets if (len(st['items']), st['shape']) in kinds]
-    def set_score(st):
-        d = sum(palette.group_distance(anchor, F[i]) for i in st['items']) / len(st['items'])
-        return d + (0.3 if last_used(history, 'news_sets', st['sku']) <= 2 else 0) - (0.1 if any(pool[i]['new'] for i in st['items']) else 0)
+    dist = lambda items: sum(palette.group_distance(anchor, F[i]) for i in items) / len(items)
+    # 3. «Новинки», первый слайд: то 1 картина, то набор из 2 — чередуем; интерьер целиком виден в сетке
+    fit = lambda n, sh: any(fits_grid(lib.templates['interiors'][t]) for t in kinds.get((n, sh), []))
+    prev_n = len(history[-1].get('news_first') or []) if history and isinstance(history[-1].get('news_first'), list) else 1
+    want_first = 2 if prev_n == 1 else 1
+    free = lambda items: not (set(items) & (busy | seen | recent(history, 'news_first')))
+    singles = [[s] for s, p in pool.items() if fit(1, p['shape']) and free([s])]
+    duos = [st for st in lib.sets if len(st['items']) == 2 and fit(2, st['shape']) and free(st['items'])]
+    first_set = None
+    if want_first == 2 and duos:
+        first_set = min(duos, key=lambda st: dist(st['items']))
+        first = list(first_set['items'])
+    else:
+        first = min(singles, key=lambda it: dist(it) - (0.1 if pool[it[0]]['new'] else 0))
+    busy |= set(first)
+    # 4. наборы: размеры чередуются 2-3-2-3 (после первого слайда из 1 картины начинаем с 2, после пары — с 3)
+    def set_score(st, used):
+        return dist(st['items']) + (0.3 if last_used(history, 'news_sets', st['sku']) <= 2 else 0) \
+            - (0.1 if any(pool[i]['new'] for i in st['items']) else 0) + 0.5 * len(used & set(st['items']))
     chosen, used_items = [], set(busy)
-    left = sorted(sets, key=set_score)
+    size = 3 if len(first) == 2 else 2
+    left = [st for st in lib.sets if (len(st['items']), st['shape']) in kinds and st is not first_set]
     while left and len(chosen) < NEWS_SLIDES - 1:
-        st = min(left, key=lambda s: set_score(s) + 0.35 * len(used_items & set(s['items'])))
-        left.remove(st)
-        if set(st['items']) <= used_items:
-            continue
-        chosen.append(st); used_items |= set(st['items'])
+        pool_n = [st for st in left if len(st['items']) == size and not set(st['items']) <= used_items] or \
+                 [st for st in left if not set(st['items']) <= used_items]
+        if not pool_n:
+            break
+        st = min(pool_n, key=lambda s: set_score(s, used_items))
+        left.remove(st); chosen.append(st); used_items |= set(st['items'])
+        size = 5 - size
     # 5. «Оновлена підбірка»: пары одной формы, ближе всего к цвету фото
-    ph = [F['photo:' + photo]]
+    ph = [col(photo, 'photo')]
     cand = sorted([s for s in pool if s not in busy], key=lambda s: palette.group_distance(ph, F[s]) - 0.01 * min(last_used(history, 'selection', s), 10))
     def pairs(shape):
-        out = []
-        for met in (True, False):
-            g = [s for s in cand if pool[s]['shape'] == shape and pool[s]['metallic'] == met]
-            out += [[g[i], g[i + 1]] for i in range(0, len(g) - 1, 2)]
-        return sorted(out, key=lambda pr: cand.index(pr[0]))
+        g = [s for s in cand if pool[s]['shape'] == shape]
+        return [[g[i], g[i + 1]] for i in range(0, len(g) - 1, 2)]
     rp, qp = pairs('round'), pairs('rect')
     cards = []
     while len(cards) < SELECTION_CARDS and (rp or qp):
         want = rp if (len(cards) % 2 == 0 and rp) or not qp else qp
         cards.append(want.pop(0))
-    return {'reel': reel, 'photo': photo, 'reel_sku': sku_of(reel), 'photo_sku': sku_of(photo), 'news_first': first, 'news_sets': [s['sku'] for s in chosen],
+    return {'reel': reel, 'photo': photo, 'reel_sku': sku_of(reel), 'photo_sku': sku_of(photo), 'news_first': first, 'news_sets': ([first_set['sku']] if first_set else []) + [s['sku'] for s in chosen],
             'selection': [s for c in cards for s in c], 'cards': cards,
-            '_sets': chosen, '_warn': warn}
+            '_sets': chosen, '_first_set': first_set, '_warn': warn}

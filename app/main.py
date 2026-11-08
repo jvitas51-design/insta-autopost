@@ -94,7 +94,7 @@ def describe(lib, p, n):
     sets = ', '.join(f'«{s["name"]}»' for s in p['_sets'])
     w = (' ВНИМАНИЕ: ' + '; '.join(p['_warn'])) if p.get('_warn') else ''
     return (f'Постинг {n}: рилс «{nm(p["reel"])}» ({p["reel"]}); фото со съёмки - {p["photo"]}; '
-            f'первый слайд «Новинок» - «{nm(p["news_first"])}» ({p["news_first"]}); наборы: {sets}; '
+            f'первый слайд «Новинок» - ' + ' + '.join(f'«{nm(s)}»' for s in p['news_first']) + f'; наборы: {sets}; '
             f'в подборке {len(p["selection"])} картин' + w)
 
 
@@ -159,7 +159,8 @@ def run():
     for u in urls['selection'] + urls['news'] + [urls['reel'], urls['cover']]:
         wait_public(u)
     texts = {'selection': captions.selection(),
-             'news': captions.news([(i, s['price']) for i, s in enumerate(p['_sets'], 2)]),
+             'news': captions.news(([(1, p['_first_set']['price'])] if p.get('_first_set') else []) +
+                                   [(i, s['price']) for i, s in enumerate(p['_sets'], 2)]),
              'reel': captions.reel(lib.reel_info[p['reel']])}
     order = order_after(kind_of(latest))
     ids = {}

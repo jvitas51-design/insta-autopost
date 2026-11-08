@@ -48,7 +48,8 @@ class Library:
             if sh and imgs:
                 self.paintings[a] = {'sku': a, 'shape': sh, 'product': p, 'image': imgs[0],
                                      'new': 'new' in (p.get('label') or {}),
-                                     'metallic': 'metallic' in (p.get('label') or {})}
+                                     'metallic': 'metallic' in (p.get('label') or {}),
+                                     'author': '@k_hryhorieva' in (p.get('name') or {}).get('ua', '')}
         self.reels = {norm_sku(os.path.splitext(f)[0]): P('library', 'reels', f)
                       for f in sorted(os.listdir(P('library', 'reels'))) if f.lower().endswith('.mp4')}
         self.photos = {norm_sku(os.path.splitext(f)[0]): P('library', 'photos', f)
