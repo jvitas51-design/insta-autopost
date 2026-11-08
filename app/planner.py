@@ -50,7 +50,11 @@ def plan(lib, history):
     valid = [s for s in lib.reel_info if 'reel:' + s in F]
     if not valid:
         raise RuntimeError('нет ни одного рилса с названием и ценой')
-    reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku')]
+    # картины, видимые в сетке в 2 соседних рядах, не повторяем ни в какой роли
+    seen = set().union(*[recent(history, k, 2) for k in ('reel_sku', 'photo_sku', 'news_first')]) if history else set()
+    reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku') and sku_of(s) not in seen]
+    if not reels:
+        reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku')]
     if not reels:
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     import zlib
@@ -58,7 +62,7 @@ def plan(lib, history):
     anchor = [F['reel:' + reel]]
     # 2. фото со съёмки: другая картина, ближе по цвету
     photos = [s for s in lib.photos if sku_of(s) != sku_of(reel) and s not in recent(history, 'photo')
-              and sku_of(s) not in recent(history, 'photo_sku')]
+              and sku_of(s) not in recent(history, 'photo_sku') and sku_of(s) not in seen]
     if not photos:
         photos = [s for s in lib.photos if sku_of(s) != sku_of(reel)]
         warn.append('фото со съёмки мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
@@ -71,7 +75,7 @@ def plan(lib, history):
     # 3. «Новинки»: первый слайд — 1 картина в интерьере, который целиком виден в сетке
     singles = {sh: [n for n in kinds.get((1, sh), []) if fits_grid(lib.templates['interiors'][n])] for sh in ('round', 'rect')}
     prev_shape = pool.get(history[-1].get('news_first'), {}).get('shape') if history else None
-    first_c = [s for s, p in pool.items() if s not in busy and s not in recent(history, 'news_first') and singles[p['shape']]]
+    first_c = [s for s, p in pool.items() if s not in busy and s not in seen and s not in recent(history, 'news_first') and singles[p['shape']]]
     alt = [s for s in first_c if pool[s]['shape'] != prev_shape]
     first_c = alt or first_c
     first = min(first_c, key=lambda s: palette.group_distance(anchor, F[s]) - (0.15 if pool[s]['new'] else 0))
