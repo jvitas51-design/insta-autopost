@@ -1,22 +1,5 @@
-Traceback (most recent call last):
-  File "/home/runner/work/insta-autopost/insta-autopost/tools/probe.py", line 6, in <module>
-    d=g('limit=2'); print('count',d['count'])
-  File "/home/runner/work/insta-autopost/insta-autopost/tools/probe.py", line 5, in g
-    return json.loads(urllib.request.urlopen(req,timeout=60).read())
-                      ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.14/urllib/request.py", line 187, in urlopen
-    return opener.open(url, data, timeout)
-           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.14/urllib/request.py", line 493, in open
-    response = meth(req, response)
-  File "/usr/lib/python3.14/urllib/request.py", line 602, in http_response
-    response = self.parent.error(
-        'http', request, response, code, msg, hdrs)
-  File "/usr/lib/python3.14/urllib/request.py", line 531, in error
-    return self._call_chain(*args)
-           ~~~~~~~~~~~~~~~~^^^^^^^
-  File "/usr/lib/python3.14/urllib/request.py", line 464, in _call_chain
-    result = func(*args)
-  File "/usr/lib/python3.14/urllib/request.py", line 611, in http_error_default
-    raise HTTPError(req.full_url, code, msg, hdrs, fp)
-urllib.error.HTTPError: HTTP Error 403: Forbidden
+count 3968
+{"variations": [{"id": 194483, "sku": "M92", "isActive": true, "barcode": null, "price": 1645, "costPriceRateDifference": 700, "costPrice": 700, "weight": 2000, "volumeWeight": 6, "height": 5000, "width": 4000, "depth": 1500, "title": null, "stockQuantity": 0, "availableQuantity": 0, "reserveQuantity": 0, "deliveryQuantity": 0, "properties": [], "attachments": [{"id": 1, "url": "https://api.sitniks.com/media/company/storage/420/64a90697da157.jpg"}], "warehouses": [{"id": 166166, "quantity": 0, "warehouse": {"id": 428, "title": "Основний", "isDefault": true, "isActive": true, "softStockThreshold": null, "hardStockThreshold": null}, "stockQuantity": 0, "availableQuantity": 0, "reserveQuantity": 0, "deliveryQuantity": 0}], "auxiliaryInfo": {}}], "attachments": [{"id": 1, "url": "https://api.sitniks.com/media/company/storage/420/64a90697da157.jpg"}], "properties": [], "category": {"id": 61636, "title": "Мольберти, фартухи та рамки", "parentCategoryId": 6740}}
+limit=3&offset=3 [258758, 258759, 258760]
+limit=3&page=2 [258758, 258759, 258760]
+limit=3&skip=3 [258763, 258764, 258769]
