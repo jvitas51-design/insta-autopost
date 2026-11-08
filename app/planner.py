@@ -53,7 +53,8 @@ def plan(lib, history):
     reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku')]
     if not reels:
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
-    reel = max(reels, key=lambda s: (last_used(history, 'reel', s), s))
+    import zlib
+    reel = max(reels, key=lambda s: (min(last_used(history, 'reel', s), 50), zlib.crc32(s.encode()) % 1000))
     anchor = [F['reel:' + reel]]
     # 2. фото со съёмки: другая картина, ближе по цвету
     photos = [s for s in lib.photos if sku_of(s) != sku_of(reel) and s not in recent(history, 'photo')

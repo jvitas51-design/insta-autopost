@@ -12,6 +12,11 @@ RECT_RE = re.compile(r'^ABN-\d{4}$')
 
 
 def norm_sku(s):
+    s, _, var = s.partition('_v')
+    return _norm(s) + ('_v' + var if var else '')
+
+
+def _norm(s):
     s = s.strip().upper().replace('К', 'K').replace('В', 'B')   # кириллица в именах файлов
     if not s.startswith('ABN-'):
         s = 'ABN-' + s
