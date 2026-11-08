@@ -1,0 +1,8 @@
+SITNIKS_API_KEY есть
+SITNIKS_KEY -
+SITNIKS_TOKEN -
+SITNIKS_API_TOKEN -
+SITNIKS -
+SITNIKS_API -
+OK https://crm.sitniks.com/open-api/products?limit=2 Bearer ['data', 'count'] | поля товара: ['id', 'title', 'titleLang', 'category', 'categoryId', 'description', 'descriptionLang', 'auxiliaryInfo', 'variations', 'attachments', 'properties']
+{"id": 258758, "title": "Мольберт-етюдник настільний", "categoryId": 61636, "description": "molbert::-:: "}
