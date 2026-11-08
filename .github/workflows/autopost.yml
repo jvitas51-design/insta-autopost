@@ -24,6 +24,7 @@ jobs:
         shell: bash
         env:
           IG_TOKEN: ${{ secrets.IG_TOKEN_AUTOPOSTING }}
+          SITNIKS_API_KEY: ${{ secrets.SITNIKS_API_KEY }}
           FORCE: ${{ github.event.inputs.force || '0' }}
       - if: always()
         run: |

@@ -93,6 +93,18 @@ class Library:
     # --- данные для подписи рилса: название, размер, цена ---
     def _resolve_reels(self):
         import collections, urllib.parse
+        self.sitniks = {}
+        sp = P('cache', 'sitniks.json')
+        key = os.environ.get('SITNIKS_API_KEY', '').strip()
+        if key and not self.offline:
+            try:
+                import sitniks
+                self.sitniks = sitniks.fetch_index(key)
+                json.dump(self.sitniks, open(sp, 'w'), ensure_ascii=False)
+            except Exception as e:
+                print('Sitniks недоступен:', e)
+        if not self.sitniks and os.path.exists(sp):
+            self.sitniks = json.load(open(sp))
         manual_p = P('library', 'reels', 'info.json')
         manual = json.load(open(manual_p)) if os.path.exists(manual_p) else {}
         typical = {}
@@ -104,6 +116,10 @@ class Library:
             size = 'd40' if sh == 'round' else '40*50'
             if sku in manual:
                 self.reel_info[sku] = dict({'size': size, 'price': typical.get(sh)}, **manual[sku]); continue
+            sk = self.sitniks.get(sku)
+            if sku not in self.products and sk and sk.get('name') and sk.get('price'):
+                self.reel_info[sku] = {'name': sk['name'], 'size': size, 'price': sk['price'], 'in_stock': False, 'source': 'sitniks'}
+                continue
             if sku in self.products:
                 p = self.products[sku]
                 self.reel_info[sku] = {'name': p['name']['ua'], 'size': size, 'price': p.get('discountPrice') or p['price'], 'in_stock': True}
