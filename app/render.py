@@ -13,6 +13,23 @@ def _tpl(lib, group, name):
     return Image.open(P('library', 'templates', t['file'])).convert('RGB'), t['slots']
 
 
+def center_crop(img, slots, width_share=None, cy_share=0.42):
+    """Квадрат вокруг картин: по центру по горизонтали, чуть выше середины по вертикали,
+    как на первых слайдах «Новинок» в ленте. Нужен, чтобы в сетке картина стояла ровно по центру."""
+    x0 = min(s[1][0] for s in slots); x1 = max(s[1][2] for s in slots)
+    y0 = min(s[1][1] for s in slots); y1 = max(s[1][3] for s in slots)
+    gw, gh = x1 - x0, y1 - y0
+    share = width_share or (0.5 if len(slots) == 1 else 0.68)
+    S = int(max(gw / share, gh / 0.62))
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    # квадрат должен помещаться в фото так, чтобы картины остались строго по центру по горизонтали
+    S = int(min(S, img.width, img.height, 2 * cx, 2 * (img.width - cx), cy / cy_share, (img.height - cy) / (1 - cy_share)))
+    S = max(S, int(max(gw, gh) / 0.8))
+    left = int(round(cx - S / 2)); top = int(round(cy - cy_share * S))
+    left = max(0, min(left, img.width - S)); top = max(0, min(top, img.height - S))
+    return img.crop((left, top, left + S, top + S))
+
+
 def render(lib, plan, outdir, seed=0):
     os.makedirs(outdir, exist_ok=True)
     files = {'selection': [], 'news': [], 'reel': None, 'cover': None}
@@ -37,7 +54,7 @@ def render(lib, plan, outdir, seed=0):
     fits = [n for n in kinds[(len(items), sh)] if fits_grid(lib.templates['interiors'][n])]
     name = fits[seed % len(fits)]
     img, slots = _tpl(lib, 'interiors', name)
-    out = render_template(img, slots, [lib.art(s) for s in items]).resize((1440, 1440), Image.LANCZOS)
+    out = center_crop(render_template(img, slots, [lib.art(s) for s in items]), slots).resize((1440, 1440), Image.LANCZOS)
     f = os.path.join(outdir, 'news_01.jpg'); out.save(f, quality=92); files['news'].append(f)
     cnt = {}
     for i, st in enumerate(plan['_sets'], 2):

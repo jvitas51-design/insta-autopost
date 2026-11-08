@@ -542,24 +542,6 @@
     2048
    ]
   },
-  "i_IMG_5978": {
-   "file": "interiors/i_IMG_5978.jpg",
-   "slots": [
-    [
-     "round",
-     [
-      1080,
-      283,
-      1816,
-      1019
-     ]
-    ]
-   ],
-   "size": [
-    2048,
-    2048
-   ]
-  },
   "i_IMG_5981": {
    "file": "interiors/i_IMG_5981.jpg",
    "slots": [
