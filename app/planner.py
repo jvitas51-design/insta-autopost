@@ -45,14 +45,14 @@ def plan(lib, history):
     pool = lib.paintings
     # 1. рилс: дольше всех не выходивший, товар есть в каталоге
     warn = []
-    valid = [s for s in lib.reels if s in pool]
+    valid = [s for s in lib.reel_info if 'reel:' + s in F]
     if not valid:
-        raise RuntimeError('нет ни одного рилса с картиной из каталога сайта')
+        raise RuntimeError('нет ни одного рилса с названием и ценой')
     reels = [s for s in valid if s not in recent(history, 'reel')]
     if not reels:
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     reel = max(reels, key=lambda s: (last_used(history, 'reel', s), s))
-    anchor = [F[reel]]
+    anchor = [F['reel:' + reel]]
     # 2. фото со съёмки: другая картина, ближе по цвету
     photos = [s for s in lib.photos if s != reel and s not in recent(history, 'photo')]
     if not photos:

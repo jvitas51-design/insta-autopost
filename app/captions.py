@@ -97,6 +97,5 @@ def news(set_slides):
     return NEWS_HEAD.format(lines=lines)
 
 
-def reel(product):
-    return REEL.format(name=title(product['name']['ua']), size=size_text(product['size']),
-                       price=price_text(product.get('discountPrice') or product['price']))
+def reel(info):
+    return REEL.format(name=title(info['name']), size=info['size'], price=price_text(info['price']))

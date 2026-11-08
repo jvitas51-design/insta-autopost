@@ -44,8 +44,10 @@ class Library:
                       for f in sorted(os.listdir(P('library', 'reels'))) if f.lower().endswith('.mp4')}
         self.photos = {norm_sku(os.path.splitext(f)[0]): P('library', 'photos', f)
                        for f in sorted(os.listdir(P('library', 'photos'))) if f.lower().endswith('.jpg')}
+        self.reel_info = {}
         self.templates = json.load(open(P('library', 'templates', 'templates.json')))
         self.feat = self._load_features()
+        self._resolve_reels()
         self.sets = []
         for s in self._raw_sets:
             ks = [k['product']['articul'] for k in (s.get('kitProducts') or []) if k.get('product')]
@@ -87,3 +89,51 @@ class Library:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             json.dump(feat, open(path, 'w'))
         return feat
+
+    # --- данные для подписи рилса: название, размер, цена ---
+    def _resolve_reels(self):
+        import collections, urllib.parse
+        manual_p = P('library', 'reels', 'info.json')
+        manual = json.load(open(manual_p)) if os.path.exists(manual_p) else {}
+        typical = {}
+        for sh in ('round', 'rect'):
+            prices = [p['product'].get('discountPrice') or p['product']['price'] for p in self.paintings.values() if p['shape'] == sh]
+            typical[sh] = collections.Counter(prices).most_common(1)[0][0] if prices else None
+        for sku in self.reels:
+            sh = 'round' if ROUND_RE.match(sku) else 'rect' if RECT_RE.match(sku) else None
+            size = 'd40' if sh == 'round' else '40*50'
+            if sku in manual:
+                self.reel_info[sku] = dict({'size': size, 'price': typical.get(sh)}, **manual[sku]); continue
+            if sku in self.products:
+                p = self.products[sku]
+                self.reel_info[sku] = {'name': p['name']['ua'], 'size': size, 'price': p.get('discountPrice') or p['price'], 'in_stock': True}
+                continue
+            # нет в наличии: название берём у премиум-набора той же картины (артикул + P)
+            name = None
+            if not self.offline:
+                try:
+                    u = 'https://api.artbynumbers.com.ua/api/server/products?' + urllib.parse.urlencode({'search': sku})
+                    with urllib.request.urlopen(urllib.request.Request(u, headers=dict(H, Accept='application/json')), timeout=40) as r:
+                        for x in json.load(r):
+                            if x.get('articul') in (sku, sku + 'P'):
+                                name = re.sub(r'^Premium\s+набір\s+', '', x['name']['ua'], flags=re.I); break
+                except Exception as e:
+                    print('поиск', sku, e)
+            if name and typical.get(sh):
+                self.reel_info[sku] = {'name': name, 'size': size, 'price': typical[sh], 'in_stock': False}
+            else:
+                print('рилс', sku, 'пропущен: не нашёл название или цену; можно задать вручную в library/reels/info.json')
+        # цвет рилса: по последнему кадру видео
+        from cover import cover_frame
+        changed = False
+        for sku in self.reel_info:
+            key = 'reel:' + sku
+            if key not in self.feat:
+                tmp = P('cache', 'reel_' + sku + '.jpg')
+                try:
+                    cover_frame(self.reels[sku], tmp)
+                    self.feat[key] = palette.features(Image.open(tmp)); changed = True
+                except Exception as e:
+                    print('кадр', sku, e)
+        if changed:
+            json.dump(self.feat, open(P('cache', 'features.json'), 'w'))

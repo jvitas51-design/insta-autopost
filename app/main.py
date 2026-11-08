@@ -90,7 +90,7 @@ def wait_public(url, timeout=300):
 
 
 def describe(lib, p, n):
-    nm = lambda s: captions.title(lib.products[s]['name']['ua']) if s in lib.products else s
+    nm = lambda s: captions.title(lib.products[s]['name']['ua']) if s in lib.products else captions.title(lib.reel_info.get(s, {}).get('name', s))
     sets = ', '.join(f'«{s["name"]}»' for s in p['_sets'])
     w = (' ВНИМАНИЕ: ' + '; '.join(p['_warn'])) if p.get('_warn') else ''
     return (f'Постинг {n}: рилс «{nm(p["reel"])}» ({p["reel"]}); фото со съёмки - {p["photo"]}; '
@@ -160,7 +160,7 @@ def run():
         wait_public(u)
     texts = {'selection': captions.selection(),
              'news': captions.news([(i, s['price']) for i, s in enumerate(p['_sets'], 2)]),
-             'reel': captions.reel(lib.products[p['reel']])}
+             'reel': captions.reel(lib.reel_info[p['reel']])}
     order = order_after(kind_of(latest))
     ids = {}
     for i, k in enumerate(order):
