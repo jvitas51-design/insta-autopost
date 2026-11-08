@@ -70,7 +70,10 @@ def plan(lib, history):
     kinds = interior_kinds(lib)
     # 3. «Новинки»: первый слайд — 1 картина в интерьере, который целиком виден в сетке
     singles = {sh: [n for n in kinds.get((1, sh), []) if fits_grid(lib.templates['interiors'][n])] for sh in ('round', 'rect')}
+    prev_shape = pool.get(history[-1].get('news_first'), {}).get('shape') if history else None
     first_c = [s for s, p in pool.items() if s not in busy and s not in recent(history, 'news_first') and singles[p['shape']]]
+    alt = [s for s in first_c if pool[s]['shape'] != prev_shape]
+    first_c = alt or first_c
     first = min(first_c, key=lambda s: palette.group_distance(anchor, F[s]) - (0.15 if pool[s]['new'] else 0))
     busy.add(first)
     # 4. наборы для «Новинок»
@@ -78,14 +81,14 @@ def plan(lib, history):
     def set_score(st):
         d = sum(palette.group_distance(anchor, F[i]) for i in st['items']) / len(st['items'])
         return d + (0.3 if last_used(history, 'news_sets', st['sku']) <= 2 else 0) - (0.1 if any(pool[i]['new'] for i in st['items']) else 0)
-    chosen, seen_items = [], set()
-    for st in sorted(sets, key=set_score):
-        key = tuple(sorted(st['items']))
-        if key in seen_items:
+    chosen, used_items = [], set(busy)
+    left = sorted(sets, key=set_score)
+    while left and len(chosen) < NEWS_SLIDES - 1:
+        st = min(left, key=lambda s: set_score(s) + 0.35 * len(used_items & set(s['items'])))
+        left.remove(st)
+        if set(st['items']) <= used_items:
             continue
-        seen_items.add(key); chosen.append(st)
-        if len(chosen) == NEWS_SLIDES - 1:
-            break
+        chosen.append(st); used_items |= set(st['items'])
     # 5. «Оновлена підбірка»: пары одной формы, ближе всего к цвету фото
     ph = [F['photo:' + photo]]
     cand = sorted([s for s in pool if s not in busy], key=lambda s: palette.group_distance(ph, F[s]) - 0.01 * min(last_used(history, 'selection', s), 10))
