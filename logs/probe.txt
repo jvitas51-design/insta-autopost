@@ -1,8 +1,22 @@
-SITNIKS_API_KEY есть
-SITNIKS_KEY -
-SITNIKS_TOKEN -
-SITNIKS_API_TOKEN -
-SITNIKS -
-SITNIKS_API -
-OK https://crm.sitniks.com/open-api/products?limit=2 Bearer ['data', 'count'] | поля товара: ['id', 'title', 'titleLang', 'category', 'categoryId', 'description', 'descriptionLang', 'auxiliaryInfo', 'variations', 'attachments', 'properties']
-{"id": 258758, "title": "Мольберт-етюдник настільний", "categoryId": 61636, "description": "molbert::-:: "}
+Traceback (most recent call last):
+  File "/home/runner/work/insta-autopost/insta-autopost/tools/probe.py", line 6, in <module>
+    d=g('limit=2'); print('count',d['count'])
+  File "/home/runner/work/insta-autopost/insta-autopost/tools/probe.py", line 5, in g
+    return json.loads(urllib.request.urlopen(req,timeout=60).read())
+                      ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 493, in open
+    response = meth(req, response)
+  File "/usr/lib/python3.14/urllib/request.py", line 602, in http_response
+    response = self.parent.error(
+        'http', request, response, code, msg, hdrs)
+  File "/usr/lib/python3.14/urllib/request.py", line 531, in error
+    return self._call_chain(*args)
+           ~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/usr/lib/python3.14/urllib/request.py", line 611, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 403: Forbidden
