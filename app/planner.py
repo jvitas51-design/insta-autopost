@@ -57,8 +57,18 @@ def plan(lib, history):
         reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku')]
     if not reels:
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
-    import zlib
-    reel = max(reels, key=lambda s: (min(last_used(history, 'reel', s), 50), zlib.crc32(s.encode()) % 1000))
+    # из рилсов, которые дольше всего не выходили, берём тот, к которому лучше всего подбираются по цвету
+    # фото со съёмки и первый слайд «Новинок» — именно эти 3 картинки стоят рядом в сетке
+    top = max(min(last_used(history, 'reel', s), 50) for s in reels)
+    tier = [s for s in reels if min(last_used(history, 'reel', s), 50) >= top - 1]
+    _c = lambda item, kind: F.get(sku_of(item)) or F[kind + ':' + item]
+    def row_fit(r):
+        rc = [_c(r, 'reel')]
+        ph = sorted(palette.group_distance(rc, _c(s, 'photo')) for s in lib.photos
+                    if sku_of(s) != sku_of(r) and sku_of(s) not in seen and s not in recent(history, 'photo'))
+        nf = sorted(palette.group_distance(rc, F[s]) for s in pool if s != sku_of(r) and s not in seen)
+        return (ph[0] if ph else 1) + (nf[0] if nf else 1)
+    reel = min(tier, key=row_fit)
     # цвет рилса и фото считаем по самой картине (ровная картинка с сайта), а не по кадру с фоном
     col = lambda item, kind: F.get(sku_of(item)) or F[kind + ':' + item]
     anchor = [col(reel, 'reel')]
