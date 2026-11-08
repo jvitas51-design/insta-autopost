@@ -1,2 +1,34 @@
-Киев 2026-11-07 21:14, последний постинг 2026-10-30, пора: True, публикация включена: False
-Публикация выключена в config.json - только предпросмотр
+[main ac3a991] post 2026-11-08: media
+ 21 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 posts/2026-11-08/news_01.jpg
+ create mode 100644 posts/2026-11-08/news_02.jpg
+ create mode 100644 posts/2026-11-08/news_03.jpg
+ create mode 100644 posts/2026-11-08/news_04.jpg
+ create mode 100644 posts/2026-11-08/news_05.jpg
+ create mode 100644 posts/2026-11-08/news_06.jpg
+ create mode 100644 posts/2026-11-08/news_07.jpg
+ create mode 100644 posts/2026-11-08/news_08.jpg
+ create mode 100644 posts/2026-11-08/news_09.jpg
+ create mode 100644 posts/2026-11-08/news_10.jpg
+ create mode 100644 posts/2026-11-08/reel_cover.jpg
+ create mode 100644 posts/2026-11-08/sel_00.jpg
+ create mode 100644 posts/2026-11-08/sel_01.jpg
+ create mode 100644 posts/2026-11-08/sel_02.jpg
+ create mode 100644 posts/2026-11-08/sel_03.jpg
+ create mode 100644 posts/2026-11-08/sel_04.jpg
+ create mode 100644 posts/2026-11-08/sel_05.jpg
+ create mode 100644 posts/2026-11-08/sel_06.jpg
+ create mode 100644 posts/2026-11-08/sel_07.jpg
+ create mode 100644 posts/2026-11-08/sel_08.jpg
+ create mode 100644 posts/2026-11-08/sel_09.jpg
+To https://github.com/jvitas51-design/insta-autopost
+   b803edb..ac3a991  main -> main
+[main ba53ed7] post 2026-11-08: history
+ 1 file changed, 55 insertions(+)
+ create mode 100644 state/history.json
+To https://github.com/jvitas51-design/insta-autopost
+   ac3a991..ba53ed7  main -> main
+Киев 2026-11-08 18:03, последний постинг 2026-10-30, пора: True, публикация включена: True
+опубликовано Рилс 17913037761485126
+опубликовано Новинки 18133861597752594
+опубликовано Оновлена підбірка 18111415097233791
