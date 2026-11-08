@@ -18,6 +18,43 @@ def refine_circle(img, box, search=14):
     cx,cy,r=best[1]
     return (cx-r,cy-r,cx+r,cy+r)
 
+def canvas_look(a, shape, seed=0):
+    """Объём холста как на фото-макетах: фактура ткани, мягкое затемнение и блик по краю, лёгкий свет сверху-слева."""
+    a = np.asarray(a).astype(float) / 255
+    h, w = a.shape[:2]
+    rng = np.random.default_rng(seed)
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    # фактура холста: мелкая сетка нитей + шум
+    period = max(2.2, w / 260)
+    tex = 0.5 * np.sin(xx * np.pi / period) * np.sin(yy * np.pi / period) + nd.gaussian_filter(rng.normal(0, 1, (h, w)), 0.7)
+    a *= (1 + 0.025 * tex)[..., None]
+    # расстояние до края и направление к краю
+    if shape == 'round':
+        cx, cy, r = (w - 1) / 2, (h - 1) / 2, min(w, h) / 2
+        d = r - np.hypot(xx - cx, yy - cy)
+        nx, ny = (xx - cx) / r, (yy - cy) / r
+    else:
+        d = np.minimum.reduce([xx, yy, w - 1 - xx, h - 1 - yy])
+        nx = np.where(xx < w - 1 - xx, -1.0, 1.0) * (np.minimum(xx, w - 1 - xx) == d)
+        ny = np.where(yy < h - 1 - yy, -1.0, 1.0) * (np.minimum(yy, h - 1 - yy) == d)
+    e = max(4.0, 0.022 * min(w, h))
+    t = np.clip(1 - d / e, 0, 1) ** 1.6                    # 1 у самого края, 0 внутри
+    side = (nx + ny) / 1.414                               # >0 правый/нижний край (в тень), <0 левый/верхний (к свету)
+    shade = 1 - t * np.where(side > 0, 0.30 * side + 0.10, 0.10) + t * np.where(side < 0, -0.10 * side, 0)
+    light = 1 + 0.045 * (0.5 - (xx / w + yy / h) / 2)
+    a *= (shade * light)[..., None]
+    return Image.fromarray((np.clip(a, 0, 1) * 255).astype('uint8'))
+
+
+def _round_corners(m, r):
+    if r < 1:
+        return m
+    big = Image.new('L', (m.width * 4, m.height * 4), 0)
+    ImageDraw.Draw(big).rounded_rectangle((0, 0, big.width - 1, big.height - 1), radius=r * 4, fill=255)
+    rr = np.asarray(big.resize(m.size, Image.LANCZOS))
+    return Image.fromarray(np.minimum(np.asarray(m), rr).astype('uint8'))
+
+
 def fit_round(art):
     """crop circle from site image (white corners)"""
     a=np.asarray(art.convert('RGB')).min(2)<245
@@ -26,7 +63,7 @@ def fit_round(art):
 def paste_round(base, art, box, grow=2):
     b=[int(round(v)) for v in (box[0]-grow,box[1]-grow,box[2]+grow,box[3]+grow)]
     w,h=b[2]-b[0],b[3]-b[1]
-    a=fit_round(art).resize((w,h),Image.LANCZOS)
+    a=canvas_look(fit_round(art).convert('RGB').resize((w,h),Image.LANCZOS),'round')
     m=Image.new('L',(w*4,h*4),0); ImageDraw.Draw(m).ellipse((0,0,w*4-1,h*4-1),fill=255)
     m=m.resize((w,h),Image.LANCZOS)
     base.paste(a,(b[0],b[1]),m); return base
@@ -37,9 +74,10 @@ def paste_rect(base, art, box, keep_mask=None):
     ar=art.width/art.height; tr=w/h
     if ar>tr: nw=int(art.height*tr); art=art.crop(((art.width-nw)//2,0,(art.width-nw)//2+nw,art.height))
     else: nh=int(art.width/tr); art=art.crop((0,(art.height-nh)//2,art.width,(art.height-nh)//2+nh))
-    a=art.convert('RGB').resize((w,h),Image.LANCZOS)
+    a=canvas_look(art.convert('RGB').resize((w,h),Image.LANCZOS),'rect')
     m=Image.new('L',(w,h),255)
     if keep_mask is not None: m=Image.fromarray(np.where(keep_mask[b[1]:b[3],b[0]:b[2]],0,255).astype('uint8'))
+    m=_round_corners(m, max(2, int(0.012*min(w,h))))
     base.paste(a,(b[0],b[1]),m); return base
 
 def sheet_mask(img, box):
