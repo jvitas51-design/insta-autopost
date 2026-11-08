@@ -1,5 +1,6 @@
 """Выбор содержимого для одного постинга (ряд из 3 постов) по правилам магазина."""
 import palette
+from library import sku_of
 
 MIN_GAP = 4            # рилс, фото со съёмки и первая картина «Новинок» не повторяются 4 постинга подряд
 NEWS_SLIDES = 10       # 1 одиночная картина + до 9 наборов
@@ -35,7 +36,8 @@ def interior_kinds(lib):
     return kinds
 
 
-def fits_grid(t, size=2048):
+def fits_grid(t, size=None):
+    size = size or t.get('size', [2048])[0]
     l, r = size * (GRID_CROP + 0.02), size * (1 - GRID_CROP - 0.02)
     return all(s[1][0] >= l and s[1][2] <= r for s in t['slots'])
 
@@ -48,21 +50,22 @@ def plan(lib, history):
     valid = [s for s in lib.reel_info if 'reel:' + s in F]
     if not valid:
         raise RuntimeError('нет ни одного рилса с названием и ценой')
-    reels = [s for s in valid if s not in recent(history, 'reel')]
+    reels = [s for s in valid if s not in recent(history, 'reel') and sku_of(s) not in recent(history, 'reel_sku')]
     if not reels:
         reels = valid; warn.append('рилсов мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     reel = max(reels, key=lambda s: (last_used(history, 'reel', s), s))
     anchor = [F['reel:' + reel]]
     # 2. фото со съёмки: другая картина, ближе по цвету
-    photos = [s for s in lib.photos if s != reel and s not in recent(history, 'photo')]
+    photos = [s for s in lib.photos if sku_of(s) != sku_of(reel) and s not in recent(history, 'photo')
+              and sku_of(s) not in recent(history, 'photo_sku')]
     if not photos:
-        photos = [s for s in lib.photos if s != reel]
+        photos = [s for s in lib.photos if sku_of(s) != sku_of(reel)]
         warn.append('фото со съёмки мало: пришлось повторить раньше, чем через %d постинга' % MIN_GAP)
     if not photos:
         raise RuntimeError('нет фото со съёмки')
     photo = min(photos, key=lambda s: palette.group_distance(anchor, F['photo:' + s]) - 0.02 * min(last_used(history, 'photo', s), 20))
     anchor.append(F['photo:' + photo])
-    busy = {reel, photo}
+    busy = {sku_of(reel), sku_of(photo)}
     kinds = interior_kinds(lib)
     # 3. «Новинки»: первый слайд — 1 картина в интерьере, который целиком виден в сетке
     singles = {sh: [n for n in kinds.get((1, sh), []) if fits_grid(lib.templates['interiors'][n])] for sh in ('round', 'rect')}
@@ -85,13 +88,17 @@ def plan(lib, history):
     # 5. «Оновлена підбірка»: пары одной формы, ближе всего к цвету фото
     ph = [F['photo:' + photo]]
     cand = sorted([s for s in pool if s not in busy], key=lambda s: palette.group_distance(ph, F[s]) - 0.01 * min(last_used(history, 'selection', s), 10))
-    rounds = [s for s in cand if pool[s]['shape'] == 'round']
-    rects = [s for s in cand if pool[s]['shape'] == 'rect']
+    def pairs(shape):
+        out = []
+        for met in (True, False):
+            g = [s for s in cand if pool[s]['shape'] == shape and pool[s]['metallic'] == met]
+            out += [[g[i], g[i + 1]] for i in range(0, len(g) - 1, 2)]
+        return sorted(out, key=lambda pr: cand.index(pr[0]))
+    rp, qp = pairs('round'), pairs('rect')
     cards = []
-    while len(cards) < SELECTION_CARDS and (len(rounds) >= 2 or len(rects) >= 2):
-        want = 'round' if len(cards) % 2 == 0 else 'rect'
-        src = rounds if (want == 'round' and len(rounds) >= 2) or len(rects) < 2 else rects
-        cards.append([src.pop(0), src.pop(0)])
-    return {'reel': reel, 'photo': photo, 'news_first': first, 'news_sets': [s['sku'] for s in chosen],
+    while len(cards) < SELECTION_CARDS and (rp or qp):
+        want = rp if (len(cards) % 2 == 0 and rp) or not qp else qp
+        cards.append(want.pop(0))
+    return {'reel': reel, 'photo': photo, 'reel_sku': sku_of(reel), 'photo_sku': sku_of(photo), 'news_first': first, 'news_sets': [s['sku'] for s in chosen],
             'selection': [s for c in cards for s in c], 'cards': cards,
             '_sets': chosen, '_warn': warn}

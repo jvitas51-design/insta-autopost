@@ -18,6 +18,10 @@ def norm_sku(s):
     return s
 
 
+def sku_of(item_id):
+    return item_id.split('_v')[0]
+
+
 def shape_of(p):
     a = p.get('articul') or ''
     if ROUND_RE.match(a) and (p.get('size') or '').startswith('40x40'):
@@ -111,18 +115,19 @@ class Library:
         for sh in ('round', 'rect'):
             prices = [p['product'].get('discountPrice') or p['product']['price'] for p in self.paintings.values() if p['shape'] == sh]
             typical[sh] = collections.Counter(prices).most_common(1)[0][0] if prices else None
-        for sku in self.reels:
+        for rid in self.reels:
+            sku = sku_of(rid)
             sh = 'round' if ROUND_RE.match(sku) else 'rect' if RECT_RE.match(sku) else None
             size = 'd40' if sh == 'round' else '40*50'
             if sku in manual:
-                self.reel_info[sku] = dict({'size': size, 'price': typical.get(sh)}, **manual[sku]); continue
+                self.reel_info[rid] = dict({'size': size, 'price': typical.get(sh)}, **manual[sku]); continue
             sk = self.sitniks.get(sku)
             if sku not in self.products and sk and sk.get('name') and sk.get('price'):
-                self.reel_info[sku] = {'name': sk['name'], 'size': size, 'price': sk['price'], 'in_stock': False, 'source': 'sitniks'}
+                self.reel_info[rid] = {'name': sk['name'], 'size': size, 'price': sk['price'], 'in_stock': False, 'source': 'sitniks'}
                 continue
             if sku in self.products:
                 p = self.products[sku]
-                self.reel_info[sku] = {'name': p['name']['ua'], 'size': size, 'price': p.get('discountPrice') or p['price'], 'in_stock': True}
+                self.reel_info[rid] = {'name': p['name']['ua'], 'size': size, 'price': p.get('discountPrice') or p['price'], 'in_stock': True}
                 continue
             # нет в наличии: название берём у премиум-набора той же картины (артикул + P)
             name = None
@@ -136,13 +141,13 @@ class Library:
                 except Exception as e:
                     print('поиск', sku, e)
             if name and typical.get(sh):
-                self.reel_info[sku] = {'name': name, 'size': size, 'price': typical[sh], 'in_stock': False}
+                self.reel_info[rid] = {'name': name, 'size': size, 'price': typical[sh], 'in_stock': False}
             else:
-                print('рилс', sku, 'пропущен: не нашёл название или цену; можно задать вручную в library/reels/info.json')
+                print('рилс', rid, 'пропущен: не нашёл название или цену; можно задать вручную в library/reels/info.json')
         # цвет рилса: по последнему кадру видео
         from cover import cover_frame
         changed = False
-        for sku in self.reel_info:
+        for sku in self.reel_info:   # здесь sku = id файла рилса
             key = 'reel:' + sku
             if key not in self.feat:
                 tmp = P('cache', 'reel_' + sku + '.jpg')

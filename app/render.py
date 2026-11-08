@@ -19,12 +19,12 @@ def render(lib, plan, outdir, seed=0):
     ph = Image.open(lib.photos[plan['photo']]).convert('RGB').resize((1080, 1080), Image.LANCZOS)
     f = os.path.join(outdir, 'sel_00.jpg'); ph.save(f, quality=92); files['selection'].append(f)
     cards = lib.templates['cards']
-    by_shape = {'round': [n for n, t in cards.items() if t['slots'][0][0] == 'round'],
-                'rect': [n for n, t in cards.items() if t['slots'][0][0] == 'rect']}
-    used = {'round': seed, 'rect': seed}
+    used = {}
     for i, pair in enumerate(plan['cards'], 1):
-        sh = lib.paintings[pair[0]]['shape']
-        name = by_shape[sh][used[sh] % len(by_shape[sh])]; used[sh] += 1
+        sh = lib.paintings[pair[0]]['shape']; met = lib.paintings[pair[0]]['metallic']
+        names = [n for n, t in cards.items() if t['slots'][0][0] == sh and t.get('metallic', True) == met] or \
+                [n for n, t in cards.items() if t['slots'][0][0] == sh]
+        k = (sh, met); name = names[(seed + used.get(k, 0)) % len(names)]; used[k] = used.get(k, 0) + 1
         img, slots = _tpl(lib, 'cards', name)
         out = render_template(img, slots, [lib.art(s) for s in pair])
         f = os.path.join(outdir, f'sel_{i:02d}.jpg'); out.save(f, quality=92); files['selection'].append(f)
