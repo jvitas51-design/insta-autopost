@@ -1,5 +1,5 @@
 {
- "posting_enabled": false,
+ "posting_enabled": true,
  "every_days": 3,
  "post_hour": 18,
  "gap_minutes": 4.5

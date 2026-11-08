@@ -2,6 +2,8 @@ name: Автопостинг
 on:
   schedule:
     - cron: '3 15,16,17 * * *'   # 18:03 по Киеву летом и зимой; скрипт сам решает, пора ли
+  push:
+    paths: ['triggers/post-now.txt']   # ручной запуск: изменить этот файл = опубликовать ряд сейчас
   workflow_dispatch:
     inputs:
       force:
@@ -25,7 +27,7 @@ jobs:
         env:
           IG_TOKEN: ${{ secrets.IG_TOKEN_AUTOPOSTING }}
           SITNIKS_API_KEY: ${{ secrets.SITNIKS_API_KEY }}
-          FORCE: ${{ github.event.inputs.force || '0' }}
+          FORCE: ${{ github.event_name == 'push' && '1' || github.event.inputs.force || '0' }}
       - if: always()
         run: |
           git config user.name autopost-bot; git config user.email autopost-bot@users.noreply.github.com
