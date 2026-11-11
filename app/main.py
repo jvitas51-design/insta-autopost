@@ -143,7 +143,15 @@ def run():
     last = datetime.date.fromisoformat(hist[-1]['date']) if hist else (
         datetime.datetime.fromisoformat(latest['timestamp'].replace('+0000', '+00:00')).astimezone(KYIV).date() if latest else None)
     force = os.environ.get('FORCE') == '1'
-    due = force or (now.hour >= CFG['post_hour'] and (last is None or (now.date() - last).days >= CFG['every_days']))
+    day_due = last is None or (now.date() - last).days >= CFG['every_days']
+    target = now.replace(hour=CFG['post_hour'], minute=0, second=0, microsecond=0)
+    if not force and day_due and now < target:
+        wait = (target - now).total_seconds()
+        # GitHub запускает расписание с опозданием на часы, поэтому стартуем заранее и ждём нужного времени
+        if wait > CFG.get('max_wait_hours', 5.5) * 3600:
+            print(f'Киев {now:%H:%M}: до публикации больше {CFG.get("max_wait_hours", 5.5)} ч, жду следующего запуска'); return
+        print(f'Киев {now:%H:%M}: жду до {target:%H:%M}'); time.sleep(wait); now = datetime.datetime.now(KYIV)
+    due = force or (day_due and now >= target)
     print(f'Киев {now:%Y-%m-%d %H:%M}, последний постинг {last}, пора: {due}, публикация включена: {CFG["posting_enabled"]}')
     if not due:
         return

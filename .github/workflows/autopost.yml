@@ -1,7 +1,7 @@
 name: Автопостинг
 on:
   schedule:
-    - cron: '3 15,16,17 * * *'   # 18:03 по Киеву летом и зимой; скрипт сам решает, пора ли
+    - cron: '7 7,9,11,13,15 * * *'   # GitHub запускает с опозданием; скрипт сам ждёт 18:00 по Киеву
   push:
     paths: ['triggers/post-now.txt']   # ручной запуск: изменить этот файл = опубликовать ряд сейчас
   workflow_dispatch:
@@ -15,7 +15,7 @@ concurrency: autopost
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
