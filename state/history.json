@@ -51,5 +51,56 @@
    "news": "18133861597752594",
    "selection": "18111415097233791"
   }
+ },
+ {
+  "reel": "ABN-1059",
+  "photo": "ABN-1065",
+  "reel_sku": "ABN-1059",
+  "photo_sku": "ABN-1065",
+  "news_first": [
+   "ABN-1067"
+  ],
+  "news_sets": [
+   "ABN02154",
+   "ABN030121",
+   "ABN02160",
+   "ABN030122",
+   "ABN02176",
+   "ABN03011",
+   "ABN02140",
+   "ABN03012",
+   "ABN02024"
+  ],
+  "selection": [
+   "ABN-019K",
+   "ABN-013K",
+   "ABN-1064",
+   "ABN-1058",
+   "ABN-065K",
+   "ABN-053K",
+   "ABN-1018",
+   "ABN-1027",
+   "ABN-034K",
+   "ABN-057K",
+   "ABN-1060",
+   "ABN-1053",
+   "ABN-064K",
+   "ABN-061K",
+   "ABN-0711",
+   "ABN-0664",
+   "ABN-055K",
+   "ABN-040K"
+  ],
+  "date": "2026-11-11",
+  "order": [
+   "selection",
+   "news",
+   "reel"
+  ],
+  "media": {
+   "selection": "18014695070972200",
+   "news": "18181690513448135",
+   "reel": "17916521442540883"
+  }
  }
 ]
