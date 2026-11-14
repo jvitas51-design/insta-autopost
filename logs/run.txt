@@ -1,1 +1,34 @@
-Киев 2026-11-13 17:17, последний постинг 2026-11-11, пора: False, публикация включена: True
+[main 3051922] post 2026-11-14: media
+ 21 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 posts/2026-11-14/news_01.jpg
+ create mode 100644 posts/2026-11-14/news_02.jpg
+ create mode 100644 posts/2026-11-14/news_03.jpg
+ create mode 100644 posts/2026-11-14/news_04.jpg
+ create mode 100644 posts/2026-11-14/news_05.jpg
+ create mode 100644 posts/2026-11-14/news_06.jpg
+ create mode 100644 posts/2026-11-14/news_07.jpg
+ create mode 100644 posts/2026-11-14/news_08.jpg
+ create mode 100644 posts/2026-11-14/news_09.jpg
+ create mode 100644 posts/2026-11-14/news_10.jpg
+ create mode 100644 posts/2026-11-14/reel_cover.jpg
+ create mode 100644 posts/2026-11-14/sel_00.jpg
+ create mode 100644 posts/2026-11-14/sel_01.jpg
+ create mode 100644 posts/2026-11-14/sel_02.jpg
+ create mode 100644 posts/2026-11-14/sel_03.jpg
+ create mode 100644 posts/2026-11-14/sel_04.jpg
+ create mode 100644 posts/2026-11-14/sel_05.jpg
+ create mode 100644 posts/2026-11-14/sel_06.jpg
+ create mode 100644 posts/2026-11-14/sel_07.jpg
+ create mode 100644 posts/2026-11-14/sel_08.jpg
+ create mode 100644 posts/2026-11-14/sel_09.jpg
+To https://github.com/jvitas51-design/insta-autopost
+   4e29e56..3051922  main -> main
+[main 87d691d] post 2026-11-14: history
+ 1 file changed, 53 insertions(+)
+To https://github.com/jvitas51-design/insta-autopost
+   3051922..87d691d  main -> main
+Киев 16:04: жду до 18:00
+Киев 2026-11-14 18:00, последний постинг 2026-11-11, пора: True, публикация включена: True
+опубликовано Рилс 17955427668294508
+опубликовано Новинки 18286862206291787
+опубликовано Оновлена підбірка 18425554864159972
